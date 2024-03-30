@@ -29,8 +29,9 @@ def create_post(request: PostBase,
     return db_post.create(db, request)
 
 @router.get("/all", response_model=List[PostDisplay])
-def posts(db: Session = Depends(get_db)):
-    return db_post.get_all(db)
+def posts(db: Session = Depends(get_db),  
+          current_user: UserAuth = Depends(get_current_user)):
+     return db_post.get_all(db, current_user.id)
 
 @router.post("/image")
 def upload_image(image: UploadFile = File(...)):
@@ -44,3 +45,7 @@ def upload_image(image: UploadFile = File(...)):
         shutil.copyfileobj(image.file, buffer)
     
     return {"filename": path}
+
+@router.delete('/delete/{id}')
+def delete(id: int, db: Session = Depends(get_db), current_user: UserAuth = Depends(get_current_user)):
+  return db_post.delete(db, id, current_user.id)
